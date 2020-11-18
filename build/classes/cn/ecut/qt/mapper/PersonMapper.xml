@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace表示命名空间 -->
+<mapper namespace="cn.ecut.qt.mapper.PersonMapper">
+<!-- 嵌套查询方法 -->
+<select id="findPersonById" parameterType="Integer" resultMap="IdCardWithPersonResult">
+
+select * from tb_person where id=#{id}
+</select>
+<resultMap type="Person" id="IdCardWithPersonResult">
+	<id property="id" column="id"/>
+	<result property="name" column="name"/>
+	<result property="age" column="age"/>
+	<result property="sex" column="sex"/>
+	<association property="card" column="card_id" javaType="IdCard" select="cn.ecut.qt.mapper.IdCardMapper.findCodeById"/>
+</resultMap>
+<!-- 嵌套结果方式 -->
+<select id="findPersonById02" parameterType="Integer" resultMap="IdCardWithPersonResult02">
+select P.* ,idcard.code 
+from tb_person p,tb_idcard idcard
+where p.card_id=idcard.id
+and p.id=#{id}
+</select>
+<resultMap type="Person" id="IdCardWithPersonResult02">
+<id property="id" column="id"/>
+<result property="name" column="name"/>
+<result property="age" column="age"/>
+<result property="sex" column="sex"/>
+<association property="card" column="card_id" javaType="IdCard">
+<id property="id" column="id"/>
+<result property="code" column="code"/>
+
+</association>
+</resultMap>
+</mapper>

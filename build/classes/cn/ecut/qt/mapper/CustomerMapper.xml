@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace表示命名空间 -->
+<mapper namespace="cn.ecut.qt.mapper.CustomerMapper">
+    <!--根据客户编号获取客户信息 -->
+	<select id="findCustomerById" parameterType="Integer"
+		resultType="cn.ecut.qt.po.Customer">
+		select * from t_customer where id = #{id}
+	</select>
+	<!-- 模糊查询 -->
+	<select id="findCustomerByName" parameterType="cn.ecut.qt.po.Customer"
+		resultType="cn.ecut.qt.po.Customer">
+		<bind name="pattern_username" value="'%'+_parameter.getUsername()+'%'"/>
+		select * from t_customer where username like #{pattern_username}
+	</select>
+	
+	
+	<insert id="addCustomer" parameterType="cn.ecut.qt.po.Customer" 
+	        keyProperty="id" useGeneratedKeys="true">	        
+		insert into t_customer(username,jobs,phone)
+		values(#{username},#{jobs},#{phone})
+	</insert>
+	
+	<update id="updateCustomer" parameterType="cn.ecut.qt.po.Customer">
+		update t_customer 
+		<set>
+		<if test="username !=null and username !=''">	
+						username=#{username},
+					</if>
+					<if test="jobs !=null and jobs !=''">	
+						jobs= #{jobs}
+					</if>
+					<if test="phone !=null and phone !=''">	
+						phone= #{phone}
+					</if>
+		
+		</set>
+		where id=#{id}
+	</update>
+	<delete id="deleteCustomer" parameterType="Integer">
+		delete from t_customer where id=#{id}
+	</delete>
+	<!-- if -->
+	<select id="findCustomerByNameAndJobs" parameterType="cn.ecut.qt.po.Customer" resultType="cn.ecut.qt.po.Customer">
+	select * from t_customer where 1=1
+	<if test="username !=null and username !=''">	
+	and username like concat('%',#{username},'%')
+	</if>
+	<if test="jobs !=null and jobs !=''">	
+	and jobs= #{jobs}
+	</if>	
+	</select>
+	<!--  choose when otherwise -->
+		<select id="findCustomerByNameOrJobs" parameterType="cn.ecut.qt.po.Customer" resultType="cn.ecut.qt.po.Customer">
+			select * from t_customer where 1=1
+			<choose>
+				<when test="username !=null and username !=''">
+				and username like concat ('%',#{username},'%')				
+				</when>
+				<when test="jobs !=null and jobs !=''">	
+				and jobs= #{jobs}
+				</when>
+			<otherwise>and phone is not null</otherwise>
+			</choose>	
+		</select>
+		<!-- where  trim -->
+		<select id="findCustomerByNameJobs" parameterType="cn.ecut.qt.po.Customer" resultType="cn.ecut.qt.po.Customer">
+				select * from t_customer 
+				<trim prefix="where" prefixOverrides="and">
+					<if test="username !=null and username !=''">	
+						and username like concat('%',#{username},'%')
+					</if>
+					<if test="jobs !=null and jobs !=''">	
+						and jobs= #{jobs}
+					</if>
+				</trim>	
+	</select>
+	<!-- 模糊查询 -->
+	<select id="findCustomerByIds" parameterType="cn.ecut.qt.po.Customer" resultType="cn.ecut.qt.po.Customer">
+		select * from t_customer where id in
+		<foreach collection="list" item="id" index="index" open="(" separator="," close=")">
+		#{id}
+		</foreach>
+	</select>
+</mapper>
